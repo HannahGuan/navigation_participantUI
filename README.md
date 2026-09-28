@@ -1,91 +1,118 @@
 # Human listener participant study
 
-The current participant site is **`docs/`**, a standalone static website for GitHub Pages. Navigation runs in the browser; DataPipe receives the data and sends it to the storage destination configured on the experiment dashboard. The previous Python-server prototype remains in `server.py` and `static/` for reference and is not used by the new site.
+The current site is **`docs/`**: a standalone GitHub Pages experiment. Each participant completes **one condition**, then data is saved to DataPipe and the Prolific return button becomes available. The planned pilot is 15 participants, targeting 3 per condition, with an estimated duration of 3 minutes and no time cutoff.
 
-## Preview locally
+## Current conditions and assignment
 
-From this folder:
+| DataPipe index | Condition | Map |
+| --- | --- | --- |
+| 0 | No directions | fence1 |
+| 1 | Suitable fence directions | fence1 |
+| 2 | No directions | lake1 |
+| 3 | Suitable lake detour | lake1 |
+| 4 | Incompatible swimmer directions | lake1 |
+
+All five currently use `P_jump`: jumping enabled, swimming and lava immunity disabled, radius-2 visibility, no prior map knowledge. Directions remain visible; old map cells become hidden. Movement is compiled directly from the existing Python sandbox.
+
+Live entry calls DataPipe's `getCondition` **once**, saves the returned assignment locally, and starts only that condition. Reloading resumes the same assignment and trajectory. Preview never requests a live assignment or uploads data; `?preview=1&condition=0` through `condition=4` selects a preview case.
+
+DataPipe cycles through 0–4. Fifteen uninterrupted assignments give three starts per condition, not necessarily three completed submissions: dropout, a lost assignment response, a cleared browser, or switching devices can affect the count. This is balanced rotation rather than independent random assignment. Do not describe it as guaranteed randomization or an enforced completion quota. A failed assignment request stops before the participant sees a map; no random fallback is used.
+
+## Local preview
 
 ```sh
 python3.11 -m http.server 8767 --bind 127.0.0.1 --directory docs
 ```
 
-Open **http://127.0.0.1:8767/?preview=1**. Preview mode never opens a DataPipe session, uploads data, or offers a Prolific completion link. A URL without `PROLIFIC_PID` also defaults to preview. Use a private browser window for a fresh preview; a regular reload preserves progress.
+Open http://127.0.0.1:8767/?preview=1&condition=1. Use a private browser window for a fresh run; reload preserves progress. Version 3 uses a separate storage key from the former five-trial prototype, leaving its backups untouched. Live local recovery is keyed by study and participant ID; another tab for that participant is blocked while the original tab holds the session lock.
 
-## GitHub Pages deployment
+## Deployment and collection setup
 
-This folder has its own Git repository, with origin `https://github.com/HannahGuan/navigation_participantUI.git`. The parent navigation_llm repository ignores it.
+This folder has its own repository at `https://github.com/HannahGuan/navigation_participantUI.git`; the parent navigation_llm repository ignores it. Commit and push this folder, then set GitHub Pages to **Deploy from a branch → your branch → /docs**. Relative paths work under the repository subdirectory. These changes have not been pushed or deployed by this development pass.
 
-1. Commit and push this repository, including `docs/` and its generated `stimuli.json`.
-2. In the repository's Settings → Pages, select **Deploy from a branch**, your branch, and **`/docs`**.
-3. After Pages reports a successful deployment, preview at `https://hannahguan.github.io/navigation_participantUI/?preview=1`.
-4. Use this external study URL in Prolific, with URL parameter recording enabled:
+Use the expected Pages URL in Prolific with all three URL parameters:
 
 ```text
 https://hannahguan.github.io/navigation_participantUI/?PROLIFIC_PID={{%PROLIFIC_PID%}}&STUDY_ID={{%STUDY_ID%}}&SESSION_ID={{%SESSION_ID%}}
 ```
 
-The above address is the expected deployment URL; this development pass has not pushed or enabled Pages. Relative asset paths support the repository subdirectory. Only publish `docs/`, never participant data.
+`docs/config.js` contains the existing DataPipe experiment `elWePWHpMmnZ`, completion URL `https://app.prolific.com/submissions/complete?cc=CSQGOE1Y`, version, 400-action limit, and recruitment targets. The targets are documentation/configuration, not a client-enforced recruitment cap. Set 15 places on Prolific. Allow room for deliberately submitted test files if setting a DataPipe submission cap.
 
-## Current settings
+On DataPipe:
 
-`docs/config.js` contains:
+1. Connect/select the intended Google Drive destination.
+2. Enable **Accept new data** (live saving was verified after this was enabled).
+3. Enable **condition assignment** with **5 conditions**. The researcher confirmed this configuration, and a live check returned HTTP 200 with condition 0.
+4. If validating JSON, match fields present in the payload (for example `trial_type`, `session_id`, `participant_id`), not unrelated jsPsych fields.
 
-- DataPipe experiment ID: `elWePWHpMmnZ`.
-- Prolific completion URL: `https://app.prolific.com/submissions/complete?cc=CSQGOE1Y`.
-- Version, collection toggle, maximum actions, and optional explicit condition definitions.
+A live synthetic storage check returned **HTTP 201 / Success**, meaning DataPipe reported the file stored at the configured provider. Filename: `QA_SYNTHETIC_QA-820f3f68-73d9-4284-acad-9e729f313fb2_single_condition.json`. It is flagged `is_test: true`, is not participant data, and uses no real Prolific ID. It contains one trial, 15 actions, 16 trajectory points, including a blocked move and fence jump. The local copy is `examples/synthetic_session.json`.
 
-At the researcher's request, the existing five cases are retained pending a later redesign: fence/no directions, fence/suitable directions, lake/no directions, lake/suitable detour, lake/swimmer directions. All currently use `P_jump` (jump enabled, swim/lava immunity disabled), radius-2 visibility, and no prior map knowledge. Order is independently randomized per session and is preserved across reloads. Instructions remain visible, but old map cells do not. These are five instruction/map cases, not the five capability profiles in capacity_pilot.
+After the researcher enabled assignment and set 5 conditions, a live assignment check returned HTTP 200 / `{"message":"Success","condition":0}`. This QA call consumed one assignment; any subsequent uninterrupted block of 15 assignments still cycles three times through all five conditions. The endpoint confirms assignment is active but does not expose the configured condition count; the five-condition setting was confirmed by the researcher. Google Drive was not independently opened to inspect the file. End-to-end published-site browser → DataPipe → Drive → Prolific verification still needs a final preview before recruitment.
 
-Ability text is generated from the actual profile for each trial. The compiled bundle supports all five source profiles and nine maps, so future condition assignments can change without rewriting movement. `fov_radius: null` gives full visibility; `prior_knowledge: 'all'` shows the whole map initially. Update the welcome visibility copy if the study design changes, and bump `studyVersion` before collecting a new version. Repeated maps can produce carryover learning; randomization does not remove it.
+## Exactly what is saved
 
-## DataPipe setup and save behavior
+Each final JSON file is an array with **one trial record**. It includes a map snapshot, coordinate convention, condition, capabilities, source hashes, assignment method/index, Prolific identifiers and the following navigation data:
 
-On the DataPipe dashboard, connect/select your Google Drive destination and enable **Accept new data**. Leave capacity for your pilot plus any deliberately submitted live tests. The final payload is a JSON array of five `trial_type: "navigation"` records. If validation is enabled, its required fields must match these records (for example `trial_type`, `session_id`, and `participant_id`); do not require unrelated jsPsych fields.
+| Field | Meaning |
+| --- | --- |
+| `trail` | Ordered `[x,y]` positions, including the start and one resulting position per action. Blocked actions repeat the position. |
+| `trajectory` | The same ordered positions, each with `step`, ISO `timestamp`, `elapsed_ms`, and movement `result`. Step 0 is the starting position at elapsed time 0. |
+| `actions` | Every attempted action: compass direction, `from`, `to`, result (`moved`, `jumped`, `blocked`), blocking reason, timestamp, elapsed time and response interval. |
+| `actions[].elapsed_ms` | Time since the trial began, including thinking, hidden-tab time, and logged reload gaps. |
+| `actions[].response_ms` | Time since the previous action; for the first action, time since trial start. Reload gaps are included. |
+| `duration_ms` | Time from trial start to the terminal action, before network upload. |
+| `wall_duration_ms` | Separate wall-clock duration, available for comparison/audit. |
+| `instruction_reading_ms` | Time from page initialization to pressing Begin, before the assignment request. Condition-specific directions first appear when the trial begins, so reading those is included in trial time. |
+| `assignment_wait_ms` | Time waiting for condition assignment, kept separate from instruction and task time. |
+| `browser_events` | Visibility changes and reload/resume events, including the estimated resume gap and whether the wall clock moved backwards. |
+| `map_snapshot` | Width, height, terrain, obstacles, start and goal, so the path can be interpreted independently of the current website. |
 
-- Every move is saved in browser localStorage. An exclusive browser lock prevents the same session running in two tabs.
-- Compact action batches are staged with the pinned official DataPipe client every 10 moves or 10 seconds, and at trial end. Final files include the entire trajectory, regardless of staging availability.
-- DataPipe staging is best-effort; a disconnected browser still collects locally. Closing the tab can leave a partial session. Do not promise participants that closing the tab deletes their data.
-- Reload resumes the same trial/order and logs a resume event. It opens a new staging segment and replays the compact event history. DataPipe may therefore produce multiple partial files for one application session. Deduplicate by `session_id`, trial index and action step; prefer a confirmed final file. Do not count partial files as additional participants.
-- At completion the exact final JSON is frozen and given a UUID + SHA-256 filename. Retries reuse those exact bytes and filename. A duplicate response for that content-addressed filename is treated as confirmation of the previous upload.
-- HTTP 201 means stored. HTTP 202 means accepted into DataPipe's durable retry queue; this also unlocks completion. It does not prove the file has already reached Google Drive.
-- Rejected uploads keep the return link hidden, display a retry option, and retain a downloadable backup. No redirect happens merely because an upload was attempted.
-- No passwords or storage credentials are embedded in the site. The DataPipe experiment ID and Prolific completion code are necessarily visible in this static website.
+Coordinates are **zero-based `[x,y]`**: x increases east/right, y increases south/down. A jump is one action and can change position by two cells. All times are milliseconds except ISO date-time strings.
 
-A live synthetic upload on 2026-09-27 reached DataPipe but was rejected with HTTP 400 / `DATA_COLLECTION_NOT_ACTIVE`. No QA file was accepted. Enable **Accept new data** on the experiment dashboard, then repeat the upload check. Before recruitment, use Prolific's preview, verify the test file appears in the configured Drive folder, and confirm the completion path. Automated and browser QA used local or mocked saving.
+Within a page, timing uses `performance.now()` rather than the adjustable wall clock. After reload, the gap since the last checkpoint is estimated using wall-clock time and explicitly logged. This preserves elapsed/response intervals instead of silently restarting them. Device sleep and system-clock changes across reload can still affect timing. Timestamps are also retained for audit. These are navigation timings, not calibrated psychophysical reaction times.
 
-DataPipe references: [client](https://github.com/jspsych/datapipe/tree/main/packages/client), [API](https://pipe.jspsych.org/docs/api), [incremental saving](https://pipe.jspsych.org/docs/experiments/streaming).
+## Persistence and completion
 
-## Data and analysis
+- Every action is backed up to localStorage. An exclusive browser lock prevents simultaneous use of the same local study session in two tabs.
+- Compact batches are staged to DataPipe every 10 actions or 10 seconds, on visibility changes, and when the trial ends. Partial staging is best-effort; the final upload always includes the entire trial.
+- Reaching the chest or the 400-action limit automatically ends the single trial and attempts the final upload. No second map is shown.
+- A refresh opens a new staging segment and replays the compact record history. Partial files may overlap; deduplicate by application session, trial index and action step. Prefer a final file when it exists.
+- Final JSON is frozen before upload, under a UUID + SHA-256 filename. Retries reuse the same bytes and filename. Duplicate-file confirmation for that content-addressed name recovers a previous successful upload with a lost response.
+- HTTP 201 confirms stored; HTTP 202 confirms accepted into DataPipe's durable retry queue. Both permit returning to Prolific. A rejected or failed request keeps the completion link hidden and offers retry and backup download.
+- Local backups remain after completion. Closing the page may leave partial data; it is not a data-deletion mechanism.
 
-Final files contain one row per navigation trial, including participant/study/Prolific-session IDs, application session ID, study version, randomized order, exact condition/instruction/capabilities, source hashes, timestamped actions (including blocked moves and jumps), trajectory, success, action count, optimal-action reference, efficiency on successful trials, coverage, and first goal visibility. Browser visibility and reload events are also recorded. Current observations can be reconstructed from the versioned map snapshot, trial configuration and trajectory; they are not duplicated in every action row.
+## CSV export
 
-Browser response times use `performance.now()` between moves and include idle/hidden time; after refresh the interval restarts and the resume is logged. Wall-clock elapsed times include reloads. These are navigation timings, not calibrated psychophysical reaction times.
-
-Download final JSON files from Drive, then export flat CSVs:
+Download the JSON files from Drive and run:
 
 ```sh
 python3.11 scripts/export_csv.py data/*.json --out data/analysis
 ```
 
-The exporter writes `trials.csv` and `actions.csv`, skips `.partial.json` files, and deduplicates final/backup copies by application session and trial. Keep the original JSON and the collected version of `docs/stimuli.json` for reproducibility. Local browser backups are not automatically erased on completion.
+Outputs:
 
-## Folder structure and validation
+- `trials.csv`: assignment, condition, outcome and overall duration.
+- `actions.csv`: one row per attempted action, with explicit `from_x`, `from_y`, `to_x`, `to_y`, timestamp and timing columns.
+- `trajectory.csv`: one row per occupied position, including step 0, with x/y, timestamp, elapsed time and result.
 
-- `docs/`: complete publishable site, configuration, navigation engine, upload adapter, generated stimuli and pinned DataPipe client.
-- `scripts/build_stimuli.py`: compiles exact movement outcomes from the existing Python sandbox and records source hashes. Requires the adjacent navigation_llm source tree only when rebuilding.
-- `scripts/check_parity.py`: reads current Python source for independent movement checks.
-- `scripts/export_csv.py`: standard-library analysis export; works standalone.
-- `tests/`: offline Node tests for navigation and mocked collection responses.
-- `server.py`, `static/`, `test_server.py`: previous local Python-server prototype; not the deployed implementation.
-- `data/`: local researcher data, Git-ignored.
+The exporter skips `.partial.json` files and prefers completed/longer records over duplicate backups. It does not deduplicate different application sessions belonging to the same person; examine Prolific IDs when deciding exclusions. The synthetic example and its three CSV exports are in `examples/`; exclude them from participant analyses.
+
+## Files and checks
+
+- `docs/`: publishable site; `assignment.js`, `engine.js`, `timing.js`, `data.js`, `storage.js`, and `app.js` separate assignment, movement, timing, export and UI.
+- `scripts/build_stimuli.py`: compiles 9 maps × 5 profiles from the adjacent Python sandbox. Rebuilding needs the navigation_llm source tree; deployment does not.
+- `scripts/check_parity.py`: current-source reference for movement parity tests.
+- `scripts/export_csv.py`: standalone standard-library CSV export.
+- `tests/`: movement, single-trial flow, assignment, timing, upload-failure and CSV-integrity tests.
+- `examples/`: clearly synthetic saved JSON and CSV data.
+- `server.py`, `static/`, `test_server.py`: legacy five-trial local prototype, not used for this study.
+- `data/`: Git-ignored researcher data.
 
 ```sh
-python3.11 scripts/build_stimuli.py
 npm test
 node --check docs/app.js
 ```
 
-Ten tests passed, including the full five-trial frontend flow with a rejected upload followed by a successful retry: 40,500 movement outcomes across 9 maps × 5 profiles, optimal paths for all 45 combinations, visibility, capability differences, action limits, randomization, immutable retries, 201/202 handling, rejected/network-failed uploads, preview isolation and staging size guards. Chrome QA verified the rendered trial, keyboard movement, refresh recovery and a 10-action successful fence route. Full live DataPipe → Drive → Prolific verification remains pending.
+Offline checks cover 40,500 movement outcomes, all 45 optimal routes, one-condition assignment, a simulated 15-start balance, blocked/jump trajectories, timing across reload, rejected saves, retry confirmation and explicit CSV fields. Chrome preview verified refresh recovery and immediate completion after one 10-action fence trial. Live storage and condition assignment both succeeded. The five-condition dashboard setting was confirmed by the researcher; the endpoint returned a valid index of 0.
 
-A static site contains map data in downloadable assets even when terrain is visually hidden. It does not enforce hidden information against deliberate developer-tools inspection.
+References: [DataPipe API](https://pipe.jspsych.org/docs/api), [DataPipe client](https://github.com/jspsych/datapipe/tree/main/packages/client). Static assets contain complete map data even when it is visually hidden; developer-tools inspection is not prevented.

@@ -1,14 +1,18 @@
 import {CONFIG} from './config.js';
-import {shuffle,validateConditions,newTrial,act,observation,abilities} from './engine.js';
+import {validateConditions,newTrial,act,observation,abilities} from './engine.js';
 import {Collector,prepareUpload} from './storage.js';
+import {assignCondition} from './assignment.js';
+import {trialClock} from './timing.js';
+import {exportRows as makeRows} from './data.js';
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
 const identifiers={PROLIFIC_PID:params.get('PROLIFIC_PID') || '',STUDY_ID:params.get('STUDY_ID') || '',SESSION_ID:params.get('SESSION_ID') || ''};
 const preview=params.get('preview')==='1' || !identifiers.PROLIFIC_PID;
-const storageKey=`navigation-v2:${preview?'preview':identifiers.STUDY_ID+':'+identifiers.SESSION_ID+':'+identifiers.PROLIFIC_PID}`;
+const storageKey=`${CONFIG.studyVersion}:${preview?'preview:'+ (params.get('condition') || 'random'):identifiers.STUDY_ID+':'+identifiers.PROLIFIC_PID}`;
 const collector=new Collector(CONFIG,{preview});
 let stimuli, conditions, session, busy=false, lockHeld=false, releaseLock;
-let lastActionAt=performance.now(), chunk=[], storageFailed=false;
+let clock=null, chunk=[], storageFailed=false;
+const pageOpenedAt=new Date().toISOString(),pageOpenedMono=performance.now();
 const now=()=>new Date().toISOString();
 function error(message){$('error').textContent=message;$('error').hidden=false;}
 function persist(){
@@ -21,7 +25,7 @@ function checkpoint(record){collector.record({session_id:session.id,study_versio
 function flushChunk(){if(chunk.length){checkpoint({kind:'actions',trial_index:current().trial_index,actions:chunk});chunk=[];}collector.flush();}
 function startStreaming(){
   collector.start(session.id);
-  checkpoint({kind:'session',condition_order:session.condition_order,started_at:session.started_at,source_library_sha256:stimuli.source_library_sha256});
+  checkpoint({kind:'session',assignment:session.assignment,started_at:session.started_at,source_library_sha256:stimuli.source_library_sha256});
   // A refresh creates a new staging segment. Replay compact records so partial data
   // remains recoverable. Final records are authoritative; deduplicate partials by session_id.
   for(const t of session.trials){
@@ -60,13 +64,13 @@ function render(){
     return;
   }
   const w=world(),last=t.actions.at(-1),o=observation(w,t.condition,t.position,t.actions.length,last?.result,last?.blocked_by);
-  $('progress').textContent=`World ${t.trial_index} of ${session.conditions.length}`;
+  $('progress').textContent='Your navigation task';
   $('moves').textContent=`${t.actions.length} / ${CONFIG.maxActions} moves`;
   $('instruction').textContent=t.condition.instruction || 'No directions are provided for this world. Explore to find the treasure.';
   $('abilities').textContent=abilities(stimuli.profiles[t.condition.profile_id]);
   $('visibility').textContent=t.condition.fov_radius===null?'You can see the whole map.':`You can see ${t.condition.fov_radius} tiles in each direction. Previously visited areas become hidden again.`;
   $('trial-end').hidden=!t.finished;$('outcome').textContent=t.success?'Treasure found!':'This world is complete';
-  $('next').textContent=t.trial_index===session.conditions.length?'Finish study →':'Next world →';
+  $('next').textContent='Save and finish →';
   document.querySelectorAll('[data-direction]').forEach(b=>b.disabled=t.finished || !lockHeld);
   $('feedback').textContent=t.finished?(t.success?'You reached the chest.':'You reached the move limit.'):last?.result==='blocked'?`Your path is blocked by ${last.blocked_by}. Choose another direction.`:last?.result==='jumped'?'You jumped over the fence.':'Look around, then choose a direction.';
   draw(o);
@@ -82,14 +86,7 @@ async function acquireLock(){
     }).catch(reject);
   });
 }
-function exportRows(){
-  return session.trials.map(t=>({...t,session_id:session.id,study_version:session.study_version,
-    experiment_id:CONFIG.experimentId,prolific:session.prolific,participant_id:session.participant_id,
-    condition_order:session.condition_order,completed_at:session.completed_at,
-    capabilities:stimuli.profiles[t.condition.profile_id],max_actions:CONFIG.maxActions,
-    source_library_sha256:stimuli.source_library_sha256,
-    browser_events:session.browser_events,display:{current_fov_only:true,persistent_instructions:true}}));
-}
+function exportRows(){return makeRows(session,stimuli,CONFIG);}
 async function submit(){
   if(preview || !session.completed_at)return;
   await prepareUpload(session,exportRows());persist();
@@ -100,9 +97,10 @@ async function submit(){
   }finally{$('submit').disabled=false;render();}
 }
 function addTrial(){
-  const c=session.conditions[session.trials.length];
+  if(session.trials.length)throw new Error('This session already has its one assigned trial.');
+  const c=session.conditions[0];
   const t=newTrial(c,stimuli.maps[c.map_id],session.trials.length);
-  session.trials.push(t);persist();lastActionAt=performance.now();
+  session.trials.push(t);clock=trialClock(t);persist();
   checkpoint({kind:'trial_start',trial_index:t.trial_index,condition:c,source_sha256:t.source_sha256,started_at:t.started_at});
 }
 $('start-form').addEventListener('submit',event=>{event.preventDefault();run(async()=>{
@@ -111,22 +109,27 @@ $('start-form').addEventListener('submit',event=>{event.preventDefault();run(asy
   if(!preview && (!identifiers.STUDY_ID || !identifiers.SESSION_ID))throw new Error('Please open the complete study link from Prolific. Study or session ID is missing.');
   await acquireLock();
   const probe=storageKey+':probe';localStorage.setItem(probe,'1');localStorage.removeItem(probe);
-  session={schema_version:2,id:crypto.randomUUID(),study_version:CONFIG.studyVersion,prolific:identifiers,
+  const instructionReadingMs=Math.round(performance.now()-pageOpenedMono);
+  const assignmentStartedMono=performance.now();
+  const assigned=await assignCondition(conditions,{preview,previewIndex:params.get('condition'),
+    client:globalThis.DataPipe,experimentId:CONFIG.experimentId});
+  session={schema_version:3,id:crypto.randomUUID(),study_version:CONFIG.studyVersion,prolific:identifiers,
     participant_id:identifiers.PROLIFIC_PID || $('participant').value.trim() || 'PREVIEW',
-    preview,started_at:now(),conditions:shuffle(conditions),trials:[],browser_events:[]};
-  session.condition_order=session.conditions.map(c=>c.id);
-  // Store the map snapshots used for this session so refreshes cannot silently change stimuli.
+    preview,started_at:now(),page_opened_at:pageOpenedAt,
+    instruction_reading_ms:instructionReadingMs,assignment_wait_ms:Math.round(performance.now()-assignmentStartedMono),
+    conditions:[assigned.condition],assignment:assigned.assignment,trials:[],browser_events:[]};
   session.stimuli=stimuli;
   persist();startStreaming();addTrial();render();$('board').focus({preventScroll:true});window.scrollTo(0,0);
 });});
 function move(bearing){
   if(storageFailed || busy || !lockHeld || !session || session.completed_at || current().finished)return;
   try{
-    const stamp=performance.now();act(current(),world(),bearing,CONFIG.maxActions,Date.now(),Math.round(stamp-lastActionAt));
-    lastActionAt=stamp;persist();chunk.push(current().actions.at(-1));
+    const sample=clock.sample();act(current(),world(),bearing,CONFIG.maxActions,sample.timestamp_ms,null,sample);
+    persist();chunk.push(current().actions.at(-1));
     if(chunk.length>=10 || current().finished)flushChunk();
     if(current().finished)checkpoint({kind:'trial_end',trial_index:current().trial_index,success:current().success,reason:current().reason,finished_at:current().finished_at});
     render();
+    if(current().finished)run(finishStudy);
   }catch(e){error(e.message);}
 }
 document.querySelectorAll('[data-direction]').forEach(b=>b.addEventListener('click',()=>move(b.dataset.direction)));
@@ -135,23 +138,22 @@ document.addEventListener('keydown',e=>{
   const b={ArrowUp:'N',ArrowRight:'E',ArrowDown:'S',ArrowLeft:'W',w:'N',d:'E',s:'S',a:'W'}[e.key];
   if(b && session && !session.completed_at){e.preventDefault();if(!e.repeat)move(b);}
 });
-$('next').addEventListener('click',()=>run(async()=>{
+async function finishStudy(){
   if(storageFailed || !current()?.finished || session.completed_at)return;
-  flushChunk();
-  if(session.trials.length===session.conditions.length){session.completed_at=now();persist();render();await submit();}
-  else{addTrial();render();$('board').focus({preventScroll:true});window.scrollTo(0,0);}
-}));
+  flushChunk();session.completed_at=now();persist();render();await submit();
+}
+$('next').addEventListener('click',()=>run(finishStudy));
 $('submit').addEventListener('click',()=>run(submit));
 function download(){if(!session)return;const blob=new Blob([JSON.stringify(exportRows(),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`navigation-${session.id}-backup.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('download').addEventListener('click',download);$('backup').addEventListener('click',download);
 document.addEventListener('visibilitychange',()=>{
   if(!session || session.completed_at)return;
   session.browser_events.push({type:'visibility',state:document.visibilityState,at:now(),trial_index:current()?.trial_index});
-  try{persist();flushChunk();}catch(e){error(e.message);}
+  try{if(clock && !current().finished)clock.sample();persist();flushChunk();}catch(e){error(e.message);}
 });
-window.addEventListener('pagehide',()=>{try{flushChunk();}catch{}releaseLock?.();});
+window.addEventListener('pagehide',()=>{try{if(session && !session.completed_at){clock?.sample();persist();flushChunk();}}catch{}releaseLock?.();});
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
-setInterval(()=>{if(session && !session.completed_at)try{flushChunk();}catch(e){error(e.message);}},10000);
+setInterval(()=>{if(session && !session.completed_at)try{if(clock && !current().finished)clock.sample();persist();flushChunk();}catch(e){error(e.message);}},10000);
 async function init(){
   const response=await fetch('./stimuli.json');if(!response.ok)throw new Error('The study maps could not load. Please reload.');
   stimuli=await response.json();conditions=CONFIG.conditions || stimuli.legacy_conditions;validateConditions(conditions,stimuli);
@@ -164,9 +166,11 @@ async function init(){
     session=JSON.parse(saved);
     if(session.study_version!==CONFIG.studyVersion)throw new Error('The study version changed. Please contact the researcher; your existing browser backup has been preserved.');
     await acquireLock();stimuli=session.stimuli;
-    session.browser_events.push({type:'resume',at:now(),trial_index:current()?.trial_index});persist();
+    if(current() && !current().finished)clock=trialClock(current(),{resume:true});
+    session.browser_events.push({type:'resume',at:now(),trial_index:current()?.trial_index,...clock?.resumeInfo});persist();
     if(!session.upload || !['stored','queued','already_stored'].includes(session.upload.status))startStreaming();
     if(!current())addTrial();render();
+    if(current().finished && !session.completed_at)await finishStudy();
   }
   $('begin').disabled=false;
   $('save-status').textContent=preview?'Preview saves stay in this browser.':'Your progress is backed up in this browser and uploaded during the study.';

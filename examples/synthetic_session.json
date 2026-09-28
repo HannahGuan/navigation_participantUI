@@ -1,0 +1,978 @@
+[
+  {
+    "trial_type": "navigation",
+    "condition": {
+      "id": "2_fence1_suitable",
+      "map_id": "fence1",
+      "profile_id": "P_jump",
+      "instruction": "Go south 11 (right over the fence). The treasure is right there.",
+      "fov_radius": 2,
+      "prior_knowledge": "none"
+    },
+    "trial_index": 1,
+    "started_at": "2026-09-28T01:36:23.361Z",
+    "started_ms": 1790559383361,
+    "last_action_ms": 1790559387111,
+    "position": [
+      2,
+      13
+    ],
+    "trail": [
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        2,
+        7
+      ],
+      [
+        2,
+        8
+      ],
+      [
+        2,
+        9
+      ],
+      [
+        2,
+        10
+      ],
+      [
+        2,
+        12
+      ],
+      [
+        2,
+        13
+      ]
+    ],
+    "actions": [
+      {
+        "step": 1,
+        "action": "N",
+        "result": "moved",
+        "position": [
+          2,
+          1
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "timestamp": "2026-09-28T01:36:23.611Z",
+        "elapsed_ms": 250,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 2,
+        "action": "N",
+        "result": "moved",
+        "position": [
+          2,
+          0
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          0
+        ],
+        "timestamp": "2026-09-28T01:36:23.861Z",
+        "elapsed_ms": 500,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 3,
+        "action": "N",
+        "result": "blocked",
+        "position": [
+          2,
+          0
+        ],
+        "blocked_by": "edge of the land",
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          2,
+          0
+        ],
+        "timestamp": "2026-09-28T01:36:24.111Z",
+        "elapsed_ms": 750,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 4,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          1
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          0
+        ],
+        "to": [
+          2,
+          1
+        ],
+        "timestamp": "2026-09-28T01:36:24.361Z",
+        "elapsed_ms": 1000,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 5,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          2
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          1
+        ],
+        "to": [
+          2,
+          2
+        ],
+        "timestamp": "2026-09-28T01:36:24.611Z",
+        "elapsed_ms": 1250,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 6,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          3
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          2
+        ],
+        "to": [
+          2,
+          3
+        ],
+        "timestamp": "2026-09-28T01:36:24.861Z",
+        "elapsed_ms": 1500,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 7,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          4
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          3
+        ],
+        "to": [
+          2,
+          4
+        ],
+        "timestamp": "2026-09-28T01:36:25.111Z",
+        "elapsed_ms": 1750,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 8,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          5
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          4
+        ],
+        "to": [
+          2,
+          5
+        ],
+        "timestamp": "2026-09-28T01:36:25.361Z",
+        "elapsed_ms": 2000,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 9,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          6
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          5
+        ],
+        "to": [
+          2,
+          6
+        ],
+        "timestamp": "2026-09-28T01:36:25.611Z",
+        "elapsed_ms": 2250,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 10,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          7
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          6
+        ],
+        "to": [
+          2,
+          7
+        ],
+        "timestamp": "2026-09-28T01:36:25.861Z",
+        "elapsed_ms": 2500,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 11,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          8
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          7
+        ],
+        "to": [
+          2,
+          8
+        ],
+        "timestamp": "2026-09-28T01:36:26.111Z",
+        "elapsed_ms": 2750,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 12,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          9
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          8
+        ],
+        "to": [
+          2,
+          9
+        ],
+        "timestamp": "2026-09-28T01:36:26.361Z",
+        "elapsed_ms": 3000,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 13,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          10
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          9
+        ],
+        "to": [
+          2,
+          10
+        ],
+        "timestamp": "2026-09-28T01:36:26.611Z",
+        "elapsed_ms": 3250,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 14,
+        "action": "S",
+        "result": "jumped",
+        "position": [
+          2,
+          12
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          10
+        ],
+        "to": [
+          2,
+          12
+        ],
+        "timestamp": "2026-09-28T01:36:26.861Z",
+        "elapsed_ms": 3500,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      },
+      {
+        "step": 15,
+        "action": "S",
+        "result": "moved",
+        "position": [
+          2,
+          13
+        ],
+        "blocked_by": null,
+        "from": [
+          2,
+          12
+        ],
+        "to": [
+          2,
+          13
+        ],
+        "timestamp": "2026-09-28T01:36:27.111Z",
+        "elapsed_ms": 3750,
+        "response_ms": 250,
+        "timing_source": "monotonic_with_logged_resume_gaps"
+      }
+    ],
+    "finished": true,
+    "trajectory": [
+      {
+        "step": 0,
+        "position": [
+          2,
+          2
+        ],
+        "elapsed_ms": 0,
+        "timestamp": "2026-09-28T01:36:23.361Z",
+        "result": "start"
+      },
+      {
+        "step": 1,
+        "position": [
+          2,
+          1
+        ],
+        "elapsed_ms": 250,
+        "timestamp": "2026-09-28T01:36:23.611Z",
+        "result": "moved"
+      },
+      {
+        "step": 2,
+        "position": [
+          2,
+          0
+        ],
+        "elapsed_ms": 500,
+        "timestamp": "2026-09-28T01:36:23.861Z",
+        "result": "moved"
+      },
+      {
+        "step": 3,
+        "position": [
+          2,
+          0
+        ],
+        "elapsed_ms": 750,
+        "timestamp": "2026-09-28T01:36:24.111Z",
+        "result": "blocked"
+      },
+      {
+        "step": 4,
+        "position": [
+          2,
+          1
+        ],
+        "elapsed_ms": 1000,
+        "timestamp": "2026-09-28T01:36:24.361Z",
+        "result": "moved"
+      },
+      {
+        "step": 5,
+        "position": [
+          2,
+          2
+        ],
+        "elapsed_ms": 1250,
+        "timestamp": "2026-09-28T01:36:24.611Z",
+        "result": "moved"
+      },
+      {
+        "step": 6,
+        "position": [
+          2,
+          3
+        ],
+        "elapsed_ms": 1500,
+        "timestamp": "2026-09-28T01:36:24.861Z",
+        "result": "moved"
+      },
+      {
+        "step": 7,
+        "position": [
+          2,
+          4
+        ],
+        "elapsed_ms": 1750,
+        "timestamp": "2026-09-28T01:36:25.111Z",
+        "result": "moved"
+      },
+      {
+        "step": 8,
+        "position": [
+          2,
+          5
+        ],
+        "elapsed_ms": 2000,
+        "timestamp": "2026-09-28T01:36:25.361Z",
+        "result": "moved"
+      },
+      {
+        "step": 9,
+        "position": [
+          2,
+          6
+        ],
+        "elapsed_ms": 2250,
+        "timestamp": "2026-09-28T01:36:25.611Z",
+        "result": "moved"
+      },
+      {
+        "step": 10,
+        "position": [
+          2,
+          7
+        ],
+        "elapsed_ms": 2500,
+        "timestamp": "2026-09-28T01:36:25.861Z",
+        "result": "moved"
+      },
+      {
+        "step": 11,
+        "position": [
+          2,
+          8
+        ],
+        "elapsed_ms": 2750,
+        "timestamp": "2026-09-28T01:36:26.111Z",
+        "result": "moved"
+      },
+      {
+        "step": 12,
+        "position": [
+          2,
+          9
+        ],
+        "elapsed_ms": 3000,
+        "timestamp": "2026-09-28T01:36:26.361Z",
+        "result": "moved"
+      },
+      {
+        "step": 13,
+        "position": [
+          2,
+          10
+        ],
+        "elapsed_ms": 3250,
+        "timestamp": "2026-09-28T01:36:26.611Z",
+        "result": "moved"
+      },
+      {
+        "step": 14,
+        "position": [
+          2,
+          12
+        ],
+        "elapsed_ms": 3500,
+        "timestamp": "2026-09-28T01:36:26.861Z",
+        "result": "jumped"
+      },
+      {
+        "step": 15,
+        "position": [
+          2,
+          13
+        ],
+        "elapsed_ms": 3750,
+        "timestamp": "2026-09-28T01:36:27.111Z",
+        "result": "moved"
+      }
+    ],
+    "clock": {
+      "elapsed_ms": 0,
+      "saved_wall_ms": 1790559383361
+    },
+    "seen": [
+      "0,0",
+      "1,0",
+      "2,0",
+      "3,0",
+      "4,0",
+      "0,1",
+      "1,1",
+      "2,1",
+      "3,1",
+      "4,1",
+      "0,2",
+      "1,2",
+      "2,2",
+      "3,2",
+      "4,2",
+      "0,3",
+      "1,3",
+      "2,3",
+      "3,3",
+      "4,3",
+      "0,4",
+      "1,4",
+      "2,4",
+      "3,4",
+      "4,4",
+      "0,5",
+      "1,5",
+      "2,5",
+      "3,5",
+      "4,5",
+      "0,6",
+      "1,6",
+      "2,6",
+      "3,6",
+      "4,6",
+      "0,7",
+      "1,7",
+      "2,7",
+      "3,7",
+      "4,7",
+      "0,8",
+      "1,8",
+      "2,8",
+      "3,8",
+      "4,8",
+      "0,9",
+      "1,9",
+      "2,9",
+      "3,9",
+      "4,9",
+      "0,10",
+      "1,10",
+      "2,10",
+      "3,10",
+      "4,10",
+      "0,11",
+      "1,11",
+      "2,11",
+      "3,11",
+      "4,11",
+      "0,12",
+      "1,12",
+      "2,12",
+      "3,12",
+      "4,12",
+      "0,13",
+      "1,13",
+      "2,13",
+      "3,13",
+      "4,13",
+      "0,14",
+      "1,14",
+      "2,14",
+      "3,14",
+      "4,14"
+    ],
+    "goal_first_seen_step": 14,
+    "own_optimal_actions": 10,
+    "source_sha256": "7812d2f02a9f5e7cf98b96056d655576e64c56b140c72dda29c705d1165016d6",
+    "success": true,
+    "reason": "goal",
+    "finished_at": "2026-09-28T01:36:27.111Z",
+    "duration_ms": 3750,
+    "wall_duration_ms": 3750,
+    "n_actions": 15,
+    "coverage": 0.3333333333333333,
+    "efficiency": 0.6666666666666666,
+    "schema_version": 3,
+    "session_id": "QA-820f3f68-73d9-4284-acad-9e729f313fb2",
+    "study_version": "navigation-human-2026-09-27-between-v3",
+    "design": "between_participants",
+    "is_test": true,
+    "assignment": {
+      "index": 1,
+      "condition_id": "2_fence1_suitable",
+      "method": "synthetic_qa_no_allocation"
+    },
+    "experiment_id": "elWePWHpMmnZ",
+    "prolific": {
+      "PROLIFIC_PID": "QA_SYNTHETIC",
+      "STUDY_ID": "QA_SYNTHETIC",
+      "SESSION_ID": "QA_SYNTHETIC"
+    },
+    "participant_id": "QA_SYNTHETIC_NOT_A_PARTICIPANT",
+    "completed_at": "2026-09-28T01:36:27.111Z",
+    "session_started_at": "2026-09-28T01:36:23.361Z",
+    "page_opened_at": "2026-09-28T01:36:22.361Z",
+    "instruction_reading_ms": 1000,
+    "capabilities": {
+      "swim": false,
+      "lava_immune": false,
+      "jump": 1
+    },
+    "max_actions": 400,
+    "source_library_sha256": "373bdca6c3a24c49291bb1e4544169925d91b546412a967ef4963f4c00641ae1",
+    "coordinate_system": "[x,y], zero-based; x increases east, y increases south",
+    "map_snapshot": {
+      "width": 15,
+      "height": 15,
+      "tiles": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "start": [
+        2,
+        2
+      ],
+      "goal": [
+        2,
+        13
+      ],
+      "objects": []
+    },
+    "browser_events": [],
+    "display": {
+      "current_fov_only": true,
+      "persistent_instructions": true
+    }
+  }
+]

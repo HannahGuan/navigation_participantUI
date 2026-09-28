@@ -1,0 +1,17 @@
+session_id,participant_id,prolific_study_id,prolific_session_id,study_version,trial_index,condition_id,map_id,profile_id,step,x,y,timestamp,elapsed_ms,result
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,0,2,2,2026-09-28T01:36:23.361Z,0,start
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,1,2,1,2026-09-28T01:36:23.611Z,250,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,2,2,0,2026-09-28T01:36:23.861Z,500,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,3,2,0,2026-09-28T01:36:24.111Z,750,blocked
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,4,2,1,2026-09-28T01:36:24.361Z,1000,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,5,2,2,2026-09-28T01:36:24.611Z,1250,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,6,2,3,2026-09-28T01:36:24.861Z,1500,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,7,2,4,2026-09-28T01:36:25.111Z,1750,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,8,2,5,2026-09-28T01:36:25.361Z,2000,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,9,2,6,2026-09-28T01:36:25.611Z,2250,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,10,2,7,2026-09-28T01:36:25.861Z,2500,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,11,2,8,2026-09-28T01:36:26.111Z,2750,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,12,2,9,2026-09-28T01:36:26.361Z,3000,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,13,2,10,2026-09-28T01:36:26.611Z,3250,moved
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,14,2,12,2026-09-28T01:36:26.861Z,3500,jumped
+QA-820f3f68-73d9-4284-acad-9e729f313fb2,QA_SYNTHETIC_NOT_A_PARTICIPANT,QA_SYNTHETIC,QA_SYNTHETIC,navigation-human-2026-09-27-between-v3,1,2_fence1_suitable,fence1,P_jump,15,2,13,2026-09-28T01:36:27.111Z,3750,moved

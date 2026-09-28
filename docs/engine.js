@@ -41,23 +41,31 @@ export function newTrial(condition, world, index, now=Date.now()) {
   return {trial_type:'navigation',condition:structuredClone(condition),trial_index:index+1,
     started_at:new Date(now).toISOString(),started_ms:now,last_action_ms:now,
     position:[...world.start],trail:[[...world.start]],actions:[],finished:false,
+    trajectory:[{step:0,position:[...world.start],elapsed_ms:0,timestamp:new Date(now).toISOString(),result:'start'}],
+    clock:{elapsed_ms:0,saved_wall_ms:now},
     seen:initial.cells.map(c=>`${c.x},${c.y}`),goal_first_seen_step:initial.goal?0:null,
     own_optimal_actions:world.rules[condition.profile_id].optimal,source_sha256:world.source_sha256};
 }
-export function act(trial, world, bearing, maxActions, now=Date.now(), responseMs=null) {
+export function act(trial, world, bearing, maxActions, now=Date.now(), responseMs=null, timing=null) {
   if(trial.finished) throw new Error('Trial is finished');
+  const from=[...trial.position];
   const next=transition(world,trial.condition.profile_id,trial.position,bearing);
   const step=trial.actions.length+1;
   const obs=observation(world,trial.condition,next.position,step,next.result,next.blocked_by);
-  trial.actions.push({step,action:bearing,...next,elapsed_ms:now-trial.started_ms,
-    response_ms:responseMs===null?now-trial.last_action_ms:responseMs});
+  const elapsed=timing?.elapsed_ms ?? now-trial.started_ms;
+  const response=responseMs ?? elapsed-(trial.actions.at(-1)?.elapsed_ms || 0);
+  const timestamp=new Date(now).toISOString();
+  trial.actions.push({step,action:bearing,...next,from,to:[...next.position],timestamp,
+    elapsed_ms:elapsed,response_ms:response,
+    timing_source:timing?'monotonic_with_logged_resume_gaps':'wall_clock'});
+  trial.trajectory.push({step,position:[...next.position],elapsed_ms:elapsed,timestamp,result:next.result});
   trial.last_action_ms=now;trial.position=next.position;trial.trail.push([...next.position]);
   trial.seen=[...new Set([...trial.seen,...obs.cells.map(c=>`${c.x},${c.y}`)])];
   if(obs.goal && trial.goal_first_seen_step===null)trial.goal_first_seen_step=step;
   const success=equal(next.position,world.goal);
   if(success || step>=maxActions) Object.assign(trial,{finished:true,success,
     reason:success?'goal':'action_limit',finished_at:new Date(now).toISOString(),
-    duration_ms:now-trial.started_ms,n_actions:step,coverage:trial.seen.length/(world.width*world.height),
+    duration_ms:elapsed,wall_duration_ms:now-trial.started_ms,n_actions:step,coverage:trial.seen.length/(world.width*world.height),
     efficiency:success?trial.own_optimal_actions/step:null});
   return obs;
 }
