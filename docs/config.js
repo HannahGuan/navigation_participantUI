@@ -1,5 +1,5 @@
 export const CONFIG = Object.freeze({
-  studyVersion: 'navigation-human-2026-09-27-between-v3',
+  studyVersion: 'navigation-human-2026-09-27-between-v4',
   experimentId: 'elWePWHpMmnZ',
   completionUrl: 'https://app.prolific.com/submissions/complete?cc=CSQGOE1Y',
   // Existing five demo_contrast cases retained at the researcher's request.

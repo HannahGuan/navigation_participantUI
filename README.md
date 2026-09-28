@@ -116,3 +116,7 @@ node --check docs/app.js
 Offline checks cover 40,500 movement outcomes, all 45 optimal routes, one-condition assignment, a simulated 15-start balance, blocked/jump trajectories, timing across reload, rejected saves, retry confirmation and explicit CSV fields. Chrome preview verified refresh recovery and immediate completion after one 10-action fence trial. Live storage and condition assignment both succeeded. The five-condition dashboard setting was confirmed by the researcher; the endpoint returned a valid index of 0.
 
 References: [DataPipe API](https://pipe.jspsych.org/docs/api), [DataPipe client](https://github.com/jspsych/datapipe/tree/main/packages/client). Static assets contain complete map data even when it is visually hidden; developer-tools inspection is not prevented.
+
+## Participant guidance revision (v4)
+
+Study version `navigation-human-2026-09-27-between-v4` adds the same notice across conditions: directions may be incorrect; participants should use their observations and abilities. The welcome page explains this, and the directions panel is first in the sidebar with larger type and a yellow background. Exported display metadata records the notice and panel treatment. Keep the three earlier v3 pilot starts distinguishable when analyzing this revised presentation. Existing v3 browser backups remain in their original storage namespace.
