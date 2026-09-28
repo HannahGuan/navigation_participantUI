@@ -3,7 +3,7 @@ export function exportRows(session, stimuli, config) {
   return session.trials.map(t=>{
     const map=stimuli.maps[t.condition.map_id];
     return {...t,schema_version:3,session_id:session.id,study_version:session.study_version,
-      design:'between_participants',is_test:Boolean(session.is_test || session.preview),assignment:session.assignment,
+      design:'between_participants',run_mode:session.run_mode || (session.preview?'preview':'participant'),is_test:Boolean(session.is_test || session.preview),assignment:session.assignment,
       experiment_id:config.experimentId,prolific:session.prolific,participant_id:session.participant_id,
       completed_at:session.completed_at || null,session_started_at:session.started_at,
       page_opened_at:session.page_opened_at,instruction_reading_ms:session.instruction_reading_ms,assignment_wait_ms:session.assignment_wait_ms,

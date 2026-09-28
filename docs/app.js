@@ -1,3 +1,4 @@
+import {resolveMode} from './mode.js';
 import {CONFIG} from './config.js';
 import {validateConditions,newTrial,act,observation,abilities} from './engine.js';
 import {Collector,prepareUpload} from './storage.js';
@@ -7,8 +8,10 @@ import {exportRows as makeRows} from './data.js';
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
 const identifiers={PROLIFIC_PID:params.get('PROLIFIC_PID') || '',STUDY_ID:params.get('STUDY_ID') || '',SESSION_ID:params.get('SESSION_ID') || ''};
-const preview=params.get('preview')==='1' || !identifiers.PROLIFIC_PID;
-const storageKey=`${CONFIG.studyVersion}:${preview?'preview:'+ (params.get('condition') || 'random'):identifiers.STUDY_ID+':'+identifiers.PROLIFIC_PID}`;
+let mode,modeError;
+try{mode=resolveMode(params);}catch(e){modeError=e;}
+const preview=mode==='preview',researcher=mode==='researcher';
+const storageKey=`${CONFIG.studyVersion}:${preview?'preview:'+ (params.get('condition') || 'random'):researcher?'researcher:'+ (params.get('run') || 'current')+':'+(params.get('condition') || 'random'):identifiers.STUDY_ID+':'+identifiers.PROLIFIC_PID}`;
 const collector=new Collector(CONFIG,{preview});
 let stimuli, conditions, session, busy=false, lockHeld=false, releaseLock;
 let clock=null, chunk=[], storageFailed=false;
@@ -21,7 +24,7 @@ function persist(){
 }
 function current(){return session?.trials.at(-1);}
 function world(){return stimuli.maps[current().condition.map_id];}
-function checkpoint(record){collector.record({session_id:session.id,study_version:session.study_version,prolific:session.prolific,...record});}
+function checkpoint(record){collector.record({session_id:session.id,study_version:session.study_version,is_test:session.is_test,run_mode:session.run_mode,prolific:session.prolific,...record});}
 function flushChunk(){if(chunk.length){checkpoint({kind:'actions',trial_index:current().trial_index,actions:chunk});chunk=[];}collector.flush();}
 function startStreaming(){
   collector.start(session.id);
@@ -56,11 +59,12 @@ function render(){
   if(done){
     $('progress').textContent='Study complete';
     const saved=['stored','queued','already_stored'].includes(session.upload?.status);
-    $('return-prolific').hidden=!saved || preview;
+    $('return-prolific').hidden=!saved || mode!=='participant';
+    $('another-test').hidden=!researcher || !saved;
     $('return-prolific').href=CONFIG.completionUrl;
     $('submit').hidden=saved || preview;
     $('submit').textContent='Save responses / retry';
-    $('completion-status').textContent=preview?'This preview is complete. You can close this page.':saved?'Your responses have been received. You can now return to Prolific.':'Your responses are saved in this browser. Please keep this page open until the upload is confirmed.';
+    $('completion-status').textContent=preview?'Preview complete. No data was uploaded.':saved?(researcher?'Test data received by DataPipe. This run is labeled as researcher test data.':'Your responses have been received. You can now return to Prolific.'):'Your responses are saved in this browser. Please keep this page open until the upload is confirmed.';
     return;
   }
   const w=world(),last=t.actions.at(-1),o=observation(w,t.condition,t.position,t.actions.length,last?.result,last?.blocked_by);
@@ -106,15 +110,19 @@ function addTrial(){
 $('start-form').addEventListener('submit',event=>{event.preventDefault();run(async()=>{
   if(!preview && !globalThis.DataPipe)throw new Error('The data service could not load. Please reload.');
   if(!preview && !CONFIG.collectionEnabled)throw new Error('This study is not open yet.');
-  if(!preview && (!identifiers.STUDY_ID || !identifiers.SESSION_ID))throw new Error('Please open the complete study link from Prolific. Study or session ID is missing.');
+  if(mode==='participant' && (!identifiers.STUDY_ID || !identifiers.SESSION_ID))throw new Error('Please open the complete study link from Prolific. Study or session ID is missing.');
   await acquireLock();
   const probe=storageKey+':probe';localStorage.setItem(probe,'1');localStorage.removeItem(probe);
   const instructionReadingMs=Math.round(performance.now()-pageOpenedMono);
   const assignmentStartedMono=performance.now();
-  const assigned=await assignCondition(conditions,{preview,previewIndex:params.get('condition'),
+  const assigned=await assignCondition(conditions,{preview:preview || researcher,previewIndex:params.get('condition'),
     client:globalThis.DataPipe,experimentId:CONFIG.experimentId});
-  session={schema_version:3,id:crypto.randomUUID(),study_version:CONFIG.studyVersion,prolific:identifiers,
-    participant_id:identifiers.PROLIFIC_PID || 'PREVIEW',
+  const id=(researcher?'TEST-':'')+crypto.randomUUID();
+  if(researcher)assigned.assignment.method='researcher_local';
+  session={schema_version:3,id,study_version:CONFIG.studyVersion,
+    prolific:mode==='participant'?identifiers:{PROLIFIC_PID:'',STUDY_ID:'',SESSION_ID:''},
+    participant_id:researcher?'RESEARCHER_TEST-'+id:identifiers.PROLIFIC_PID || 'PREVIEW',
+    is_test:mode!=='participant',run_mode:mode,
     preview,started_at:now(),page_opened_at:pageOpenedAt,
     instruction_reading_ms:instructionReadingMs,assignment_wait_ms:Math.round(performance.now()-assignmentStartedMono),
     conditions:[assigned.condition],assignment:assigned.assignment,trials:[],browser_events:[]};
@@ -144,6 +152,10 @@ async function finishStudy(){
 }
 $('next').addEventListener('click',()=>run(finishStudy));
 $('submit').addEventListener('click',()=>run(submit));
+$('another-test').addEventListener('click',()=>{
+  const url=new URL(location.href);url.searchParams.set('mode','researcher');url.searchParams.set('run',crypto.randomUUID());
+  ['preview','PROLIFIC_PID','STUDY_ID','SESSION_ID'].forEach(k=>url.searchParams.delete(k));location.assign(url.href);
+});
 document.addEventListener('visibilitychange',()=>{
   if(!session || session.completed_at)return;
   session.browser_events.push({type:'visibility',state:document.visibilityState,at:now(),trial_index:current()?.trial_index});
@@ -153,6 +165,15 @@ window.addEventListener('pagehide',()=>{try{if(session && !session.completed_at)
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
 setInterval(()=>{if(session && !session.completed_at)try{if(clock && !current().finished)clock.sample();persist();flushChunk();}catch(e){error(e.message);}},10000);
 async function init(){
+  if(modeError)throw modeError;
+  if(mode!=='participant'){
+    $('researcher-note').hidden=false;
+    $('mode-label').textContent=researcher?'Researcher test mode':'Preview mode — no upload';
+    $('mode-description').textContent=researcher?'This test saves your trajectory and timing through DataPipe to the configured Google Drive destination. Files are labeled TEST and excluded from the default participant CSV export. It does not use a participant condition assignment or complete a Prolific submission.':'This preview stays in your browser and does not upload data. Remove preview=1 from the URL to run a researcher test that saves data.';
+    const url=new URL(location.href || 'http://localhost/');url.search='';url.hash='';
+    $('participant-url').textContent=url.href+'?PROLIFIC_PID={{%PROLIFIC_PID%}}&STUDY_ID={{%STUDY_ID%}}&SESSION_ID={{%SESSION_ID%}}';
+  }
+  if(researcher)document.title='Researcher test · Navigation study';
   const response=await fetch('./stimuli.json');if(!response.ok)throw new Error('The study maps could not load. Please reload.');
   stimuli=await response.json();conditions=CONFIG.conditions || stimuli.legacy_conditions;validateConditions(conditions,stimuli);
   $('board').tabIndex=0;

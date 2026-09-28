@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 
-def export(inputs, out):
+def export(inputs, out, include_tests=False):
     out.mkdir(parents=True,exist_ok=True)
     unique={}
     for path in inputs:
@@ -14,6 +14,7 @@ def export(inputs, out):
         data=json.loads(path.read_text())
         if not isinstance(data,list):raise ValueError(f'{path}: expected a final session JSON array')
         for t in data:
+            if t.get('is_test') and not include_tests:continue
             key=(t['session_id'],t['trial_index'])
             prior=unique.get(key)
             # Prefer completed or more complete records when a backup is also supplied.
@@ -57,5 +58,6 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('inputs',nargs='+',type=Path)
     parser.add_argument('--out',type=Path,default=Path('data/analysis'))
+    parser.add_argument('--include-tests',action='store_true',help='Include labeled researcher/synthetic runs')
     args=parser.parse_args()
-    export(args.inputs,args.out)
+    export(args.inputs,args.out,args.include_tests)

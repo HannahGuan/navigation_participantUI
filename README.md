@@ -14,17 +14,17 @@ The current site is **`docs/`**: a standalone GitHub Pages experiment. Each part
 
 All five currently use `P_jump`: jumping enabled, swimming and lava immunity disabled, radius-2 visibility, no prior map knowledge. Directions remain visible; old map cells become hidden. Movement is compiled directly from the existing Python sandbox.
 
-Live entry calls DataPipe's `getCondition` **once**, saves the returned assignment locally, and starts only that condition. Reloading resumes the same assignment and trajectory. Participant IDs are read automatically from the Prolific URL; no ID entry or session-download controls are displayed. Preview has no in-page banner or storage status; it is identified in the browser tab title and completion message. Browser backups remain internal. Preview never requests a live assignment or uploads data; `?preview=1&condition=0` through `condition=4` selects a preview case.
+Live entry calls DataPipe's `getCondition` **once**, saves the returned assignment locally, and starts only that condition. Reloading resumes the same assignment and trajectory. Participant IDs are read automatically from the Prolific URL; no ID entry or session-download controls are displayed. Opening the bare URL starts **researcher test mode**: a first-page badge explains saving and expands to show the Prolific participant-entry URL. Researcher runs upload trajectory and timing through DataPipe, have TEST filenames and `is_test: true`, and do not consume participant assignments or offer Prolific completion. The CSV exporter excludes these runs by default; use `--include-tests` to inspect them. Complete Prolific URL identifiers enter participant mode without a researcher badge. Partial or unresolved identifiers show an entry error. Browser backups remain internal. Explicit preview never requests a live assignment or uploads data; `?preview=1&condition=0` through `condition=4` selects a preview case.
 
 DataPipe cycles through 0–4. Fifteen uninterrupted assignments give three starts per condition, not necessarily three completed submissions: dropout, a lost assignment response, a cleared browser, or switching devices can affect the count. This is balanced rotation rather than independent random assignment. Do not describe it as guaranteed randomization or an enforced completion quota. A failed assignment request stops before the participant sees a map; no random fallback is used.
 
-## Local preview
+## Local researcher testing and preview
 
 ```sh
 python3.11 -m http.server 8767 --bind 127.0.0.1 --directory docs
 ```
 
-Open http://127.0.0.1:8767/?preview=1&condition=1. Use a private browser window for a fresh run; reload preserves progress. Version 3 uses a separate storage key from the former five-trial prototype, leaving its backups untouched. Live local recovery is keyed by study and participant ID; another tab for that participant is blocked while the original tab holds the session lock.
+Open http://127.0.0.1:8767/ for a researcher test that uploads data. Use `?condition=1` to choose a case, and the completion screen’s **Start another test** button for a fresh session. For an offline preview, open http://127.0.0.1:8767/?preview=1&condition=1. Use a private browser window for a fresh run; reload preserves progress. Version 3 uses a separate storage key from the former five-trial prototype, leaving its backups untouched. Live local recovery is keyed by study and participant ID; another tab for that participant is blocked while the original tab holds the session lock.
 
 ## Deployment and collection setup
 

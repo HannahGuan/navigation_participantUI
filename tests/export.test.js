@@ -10,7 +10,7 @@ test('CSV export keeps every timestamped trajectory point, blocked move and jump
   const full=JSON.parse(readFileSync(new URL('../examples/synthetic_session.json',import.meta.url)));
   const backup=structuredClone(full);backup[0].completed_at=null;backup[0].finished=false;backup[0].actions=backup[0].actions.slice(0,2);backup[0].trajectory=backup[0].trajectory.slice(0,3);
   writeFileSync(join(dir,'backup.json'),JSON.stringify(backup));writeFileSync(join(dir,'final.json'),JSON.stringify(full));
-  execFileSync('python3.11',['scripts/export_csv.py',join(dir,'backup.json'),join(dir,'final.json'),'--out',join(dir,'csv')],{cwd:new URL('..',import.meta.url)});
+  execFileSync('python3.11',['scripts/export_csv.py',join(dir,'backup.json'),join(dir,'final.json'),'--include-tests','--out',join(dir,'csv')],{cwd:new URL('..',import.meta.url)});
   const result=JSON.parse(execFileSync('python3.11',['-c',`import csv,json,pathlib,sys
 p=pathlib.Path(sys.argv[1]);print(json.dumps({n:list(csv.DictReader((p/(n+'.csv')).open())) for n in ('trials','actions','trajectory')}))`,join(dir,'csv')]));
   assert.equal(result.trials.length,1);assert.equal(result.trials[0].duration_ms,'3750');
