@@ -12,6 +12,6 @@ export function exportRows(session, stimuli, config) {
       coordinate_system:'[x,y], zero-based; x increases east, y increases south',
       map_snapshot:{width:map.width,height:map.height,tiles:map.tiles,start:map.start,goal:map.goal,objects:map.objects},
       browser_events:session.browser_events,
-      display:{current_fov_only:t.condition.fov_radius!==null,persistent_instructions:true,directions_notice:"Directions may be incorrect. Use what you see and your abilities to decide where to go.",directions_panel:"highlighted_first"}};
+      display:{current_fov_only:t.condition.fov_radius!==null,persistent_instructions:true,directions_notice:"The speaker may not know your abilities. Use what you see and your abilities to decide where to go.",directions_panel:"highlighted_first"}};
   });
 }
