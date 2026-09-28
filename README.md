@@ -14,7 +14,7 @@ The current site is **`docs/`**: a standalone GitHub Pages experiment. Each part
 
 All five currently use `P_jump`: jumping enabled, swimming and lava immunity disabled, radius-2 visibility, no prior map knowledge. Directions remain visible; old map cells become hidden. Movement is compiled directly from the existing Python sandbox.
 
-Live entry calls DataPipe's `getCondition` **once**, saves the returned assignment locally, and starts only that condition. Reloading resumes the same assignment and trajectory. Preview never requests a live assignment or uploads data; `?preview=1&condition=0` through `condition=4` selects a preview case.
+Live entry calls DataPipe's `getCondition` **once**, saves the returned assignment locally, and starts only that condition. Reloading resumes the same assignment and trajectory. Participant IDs are read automatically from the Prolific URL; no ID entry or session-download controls are displayed. Preview has no in-page banner or storage status; it is identified in the browser tab title and completion message. Browser backups remain internal. Preview never requests a live assignment or uploads data; `?preview=1&condition=0` through `condition=4` selects a preview case.
 
 DataPipe cycles through 0–4. Fifteen uninterrupted assignments give three starts per condition, not necessarily three completed submissions: dropout, a lost assignment response, a cleared browser, or switching devices can affect the count. This is balanced rotation rather than independent random assignment. Do not describe it as guaranteed randomization or an enforced completion quota. A failed assignment request stops before the participant sees a map; no random fallback is used.
 
@@ -78,7 +78,7 @@ Within a page, timing uses `performance.now()` rather than the adjustable wall c
 - Reaching the chest or the 400-action limit automatically ends the single trial and attempts the final upload. No second map is shown.
 - A refresh opens a new staging segment and replays the compact record history. Partial files may overlap; deduplicate by application session, trial index and action step. Prefer a final file when it exists.
 - Final JSON is frozen before upload, under a UUID + SHA-256 filename. Retries reuse the same bytes and filename. Duplicate-file confirmation for that content-addressed name recovers a previous successful upload with a lost response.
-- HTTP 201 confirms stored; HTTP 202 confirms accepted into DataPipe's durable retry queue. Both permit returning to Prolific. A rejected or failed request keeps the completion link hidden and offers retry and backup download.
+- HTTP 201 confirms stored; HTTP 202 confirms accepted into DataPipe's durable retry queue. Both permit returning to Prolific. A rejected or failed request keeps the completion link hidden and offers retry while retaining the local backup.
 - Local backups remain after completion. Closing the page may leave partial data; it is not a data-deletion mechanism.
 
 ## CSV export

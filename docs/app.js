@@ -17,7 +17,7 @@ const now=()=>new Date().toISOString();
 function error(message){$('error').textContent=message;$('error').hidden=false;}
 function persist(){
   try{localStorage.setItem(storageKey,JSON.stringify(session));}
-  catch{storageFailed=true;throw new Error('The browser backup could not be saved. Please download your backup and contact the researcher before continuing.');}
+  catch{storageFailed=true;throw new Error('The browser backup could not be saved. Please keep this page open and contact the researcher before continuing.');}
 }
 function current(){return session?.trials.at(-1);}
 function world(){return stimuli.maps[current().condition.map_id];}
@@ -52,15 +52,15 @@ function draw(o) {
 function render(){
   if(!session)return;
   const t=current(),done=Boolean(session.completed_at);
-  $('welcome').hidden=true;$('play').hidden=done;$('complete').hidden=!done;$('backup').hidden=false;
+  $('welcome').hidden=true;$('play').hidden=done;$('complete').hidden=!done;
   if(done){
-    $('progress').textContent='Study complete';$('session-label').textContent=`Session: ${session.id}`;
+    $('progress').textContent='Study complete';
     const saved=['stored','queued','already_stored'].includes(session.upload?.status);
     $('return-prolific').hidden=!saved || preview;
     $('return-prolific').href=CONFIG.completionUrl;
     $('submit').hidden=saved || preview;
     $('submit').textContent='Save responses / retry';
-    $('completion-status').textContent=preview?'Preview complete. No data was uploaded to the study.':saved?'Your responses have been received. You can now return to Prolific.':'Your responses are saved in this browser. Please keep this page open until the upload is confirmed.';
+    $('completion-status').textContent=preview?'This preview is complete. You can close this page.':saved?'Your responses have been received. You can now return to Prolific.':'Your responses are saved in this browser. Please keep this page open until the upload is confirmed.';
     return;
   }
   const w=world(),last=t.actions.at(-1),o=observation(w,t.condition,t.position,t.actions.length,last?.result,last?.blocked_by);
@@ -90,7 +90,7 @@ function exportRows(){return makeRows(session,stimuli,CONFIG);}
 async function submit(){
   if(preview || !session.completed_at)return;
   await prepareUpload(session,exportRows());persist();
-  $('save-status').textContent='Uploading your responses…';$('submit').disabled=true;
+  $('save-status').hidden=false;$('save-status').textContent='Saving your responses…';$('submit').disabled=true;
   try{
     session.upload.status=await collector.submit(session.upload);session.upload.confirmed_at=now();persist();
     $('save-status').textContent='Upload confirmed.';
@@ -114,7 +114,7 @@ $('start-form').addEventListener('submit',event=>{event.preventDefault();run(asy
   const assigned=await assignCondition(conditions,{preview,previewIndex:params.get('condition'),
     client:globalThis.DataPipe,experimentId:CONFIG.experimentId});
   session={schema_version:3,id:crypto.randomUUID(),study_version:CONFIG.studyVersion,prolific:identifiers,
-    participant_id:identifiers.PROLIFIC_PID || $('participant').value.trim() || 'PREVIEW',
+    participant_id:identifiers.PROLIFIC_PID || 'PREVIEW',
     preview,started_at:now(),page_opened_at:pageOpenedAt,
     instruction_reading_ms:instructionReadingMs,assignment_wait_ms:Math.round(performance.now()-assignmentStartedMono),
     conditions:[assigned.condition],assignment:assigned.assignment,trials:[],browser_events:[]};
@@ -144,8 +144,6 @@ async function finishStudy(){
 }
 $('next').addEventListener('click',()=>run(finishStudy));
 $('submit').addEventListener('click',()=>run(submit));
-function download(){if(!session)return;const blob=new Blob([JSON.stringify(exportRows(),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`navigation-${session.id}-backup.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-$('download').addEventListener('click',download);$('backup').addEventListener('click',download);
 document.addEventListener('visibilitychange',()=>{
   if(!session || session.completed_at)return;
   session.browser_events.push({type:'visibility',state:document.visibilityState,at:now(),trial_index:current()?.trial_index});
@@ -158,9 +156,7 @@ async function init(){
   const response=await fetch('./stimuli.json');if(!response.ok)throw new Error('The study maps could not load. Please reload.');
   stimuli=await response.json();conditions=CONFIG.conditions || stimuli.legacy_conditions;validateConditions(conditions,stimuli);
   $('board').tabIndex=0;
-  $('participant').required=false;
-  if(preview){$('mode-note').hidden=false;$('mode-note').textContent='Preview mode — no participant data will be uploaded and no Prolific completion will be submitted.';$('participant').value='PREVIEW';}
-  else{$('participant-field').hidden=true;$('participant').value=identifiers.PROLIFIC_PID;}
+  if(preview)document.title='Preview · Navigation study';
   const saved=localStorage.getItem(storageKey);
   if(saved){
     session=JSON.parse(saved);
@@ -173,6 +169,6 @@ async function init(){
     if(current().finished && !session.completed_at)await finishStudy();
   }
   $('begin').disabled=false;
-  $('save-status').textContent=preview?'Preview saves stay in this browser.':'Your progress is backed up in this browser and uploaded during the study.';
+
 }
 init().catch(e=>error(e.message));
