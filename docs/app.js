@@ -11,7 +11,7 @@ const identifiers={PROLIFIC_PID:params.get('PROLIFIC_PID') || '',STUDY_ID:params
 let mode,modeError;
 try{mode=resolveMode(params);}catch(e){modeError=e;}
 const preview=mode==='preview',researcher=mode==='researcher';
-const storageKey=`${CONFIG.studyVersion}:${preview?'preview:'+ (params.get('condition') || 'random'):researcher?'researcher:'+ (params.get('run') || 'current')+':'+(params.get('condition') || 'random'):identifiers.STUDY_ID+':'+identifiers.PROLIFIC_PID}`;
+const storageKey=`${CONFIG.studyVersion}:${CONFIG.fixedConditionId?'topup:'+CONFIG.fixedConditionId+':':''}${preview?'preview:'+ (params.get('condition') || 'random'):researcher?'researcher:'+ (params.get('run') || 'current')+':'+(params.get('condition') || 'random'):identifiers.STUDY_ID+':'+identifiers.PROLIFIC_PID}`;
 const collector=new Collector(CONFIG,{preview});
 let stimuli, conditions, session, busy=false, lockHeld=false, releaseLock;
 let clock=null, chunk=[], storageFailed=false;
@@ -116,7 +116,7 @@ $('start-form').addEventListener('submit',event=>{event.preventDefault();run(asy
   const instructionReadingMs=Math.round(performance.now()-pageOpenedMono);
   const assignmentStartedMono=performance.now();
   const assigned=await assignCondition(conditions,{preview:preview || researcher,previewIndex:params.get('condition'),
-    client:globalThis.DataPipe,experimentId:CONFIG.experimentId});
+    client:globalThis.DataPipe,experimentId:CONFIG.experimentId,fixedConditionId:CONFIG.fixedConditionId});
   const id=(researcher?'TEST-':'')+crypto.randomUUID();
   if(researcher)assigned.assignment.method='researcher_local';
   session={schema_version:3,id,study_version:CONFIG.studyVersion,

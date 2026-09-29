@@ -45,3 +45,12 @@ test('final data includes a reconstructable map, coordinate convention, one assi
  const session={id:'test',study_version:CONFIG.studyVersion,assignment:{index:0},trials:[t],prolific:{},browser_events:[]};
  const [row]=exportRows(session,s,CONFIG);assert.deepEqual(row.map_snapshot.tiles,w.tiles);assert.match(row.coordinate_system,/zero-based/);assert.equal(row.actions[0].elapsed_ms,250);assert.equal(row.trajectory[1].elapsed_ms,250);assert.equal(row.schema_version,3);
 });
+
+test('fixed top-up keeps original lake condition index and bypasses shared assignment',async()=>{
+ const client={getCondition:async()=>{throw new Error('Must not consume counter');}};
+ for(const preview of [false,true]){
+ const a=await assignCondition(s.legacy_conditions,{preview,previewIndex:'0',client,fixedConditionId:'4_lake1_suitable'});
+ assert.equal(a.assignment.index,3);assert.equal(a.condition.map_id,'lake1');assert.equal(a.assignment.method,'fixed_top_up');
+ }
+ await assert.rejects(assignCondition(s.legacy_conditions,{preview:false,client,fixedConditionId:'unknown'}),/Invalid condition/);
+});

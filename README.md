@@ -120,3 +120,7 @@ References: [DataPipe API](https://pipe.jspsych.org/docs/api), [DataPipe client]
 ## Participant guidance revision (v4)
 
 Study version `navigation-human-2026-09-27-between-v4` adds the same notice across conditions: the speaker may not know the participant’s abilities; participants should use their observations and abilities. The welcome page explains this, and the directions panel is first in the sidebar with larger type and a yellow background. Exported display metadata records the notice and panel treatment. Keep the three earlier v3 pilot starts distinguishable when analyzing this revised presentation. Existing v3 browser backups remain in their original storage namespace.
+
+## Temporary lake/suitable top-up collection
+
+`docs/config.js` now sets `fixedConditionId: '4_lake1_suitable'`. New participant, researcher, and preview sessions receive this case (original assignment index 3); DataPipe's condition counter is bypassed, but uploads and Prolific completion are unchanged. A separate local storage namespace prevents resuming a different earlier condition. Participant assignment metadata records `fixed_top_up`. Set `fixedConditionId: null` to restore the five-condition allocation. Set one place on Prolific for the planned additional completion; the site does not enforce a recruitment cap. Deploy this revision before recruiting.

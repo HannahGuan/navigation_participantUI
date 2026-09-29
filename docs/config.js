@@ -12,4 +12,7 @@ export const CONFIG = Object.freeze({
   // Explicit conditions: [{id, map_id, profile_id, instruction, fov_radius, prior_knowledge}].
   // fov_radius:null means full visibility; prior_knowledge:'all' reveals the initial map.
   conditions: null,
+  // Temporary top-up collection: lake1 with suitable directions (original index 3).
+  // Set null to restore DataPipe assignment across all five conditions.
+  fixedConditionId: '4_lake1_suitable',
 });

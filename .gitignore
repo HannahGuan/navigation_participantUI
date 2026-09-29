@@ -2,3 +2,6 @@ __pycache__/
 *.py[cod]
 data/
 .DS_Store
+
+#Ignore data files
+/analysis/

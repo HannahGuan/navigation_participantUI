@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {CONFIG} from '../docs/config.js';
 import {BEARINGS,transition} from '../docs/engine.js';
 for(const research of [false,true]) {
 test(`${research?'researcher':'participant'} single-trial flow: upload, retry, mode isolation`,async()=>{
@@ -20,7 +21,7 @@ test(`${research?'researcher':'participant'} single-trial flow: upload, retry, m
  const settle=async()=>{for(let i=0;i<10;i++)await new Promise(setImmediate);};
  await settle();assert.equal(el('begin').disabled,false);
  callbacks.get('start-form:submit')({preventDefault(){}});await settle();
- const stored=()=>JSON.parse([...data.values()][0]);assert.equal(stored().conditions.length,1);assert.equal(stored().assignment.index,1);assert.equal(assignments,research?0:1);
+ const stored=()=>JSON.parse([...data.values()][0]);assert.equal(stored().conditions.length,1);assert.equal(stored().assignment.index,CONFIG.fixedConditionId?stimuli.legacy_conditions.findIndex(c=>c.id===CONFIG.fixedConditionId):1);assert.equal(assignments,CONFIG.fixedConditionId||research?0:1);
  for(let i=0;i<1;i++){
   const t=stored().trials.at(-1),w=stimuli.maps[t.condition.map_id],q=[[t.position,[]]],seen=new Set([String(t.position)]);let path;
   for(let j=0;j<q.length;j++){const [p,r]=q[j];if(String(p)===String(w.goal)){path=r;break;}for(const b of BEARINGS){const n=transition(w,t.condition.profile_id,p,b);if(n.result!=='blocked'&&!seen.has(String(n.position))){seen.add(String(n.position));q.push([n.position,[...r,b]]);}}}
@@ -28,7 +29,7 @@ test(`${research?'researcher':'participant'} single-trial flow: upload, retry, m
   const savedId=stored().id, savedCondition=stored().assignment.condition_id;
   const oldInterval=globalThis.setInterval;globalThis.setInterval=()=>0;
   try{await import('../docs/app.js?reload-test='+research);}finally{globalThis.setInterval=oldInterval;}
-  await settle();assert.equal(assignments,research?0:1);assert.equal(stored().id,savedId);assert.equal(stored().assignment.condition_id,savedCondition);
+  await settle();assert.equal(assignments,CONFIG.fixedConditionId||research?0:1);assert.equal(stored().id,savedId);assert.equal(stored().assignment.condition_id,savedCondition);
   assert.equal(stored().trials.at(-1).actions.length,2);
   path.slice(2).forEach(b=>callbacks.get(b+':click')());assert.equal(stored().trials.at(-1).success,true);
   await settle();
